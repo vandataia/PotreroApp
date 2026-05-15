@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Potrero.app — Gestión para Escuelas de Fútbol</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde: #2ECC71;
+    --verde-osc: #1a8a4a;
+    --verde-field: #1B5E20;
+    --naranja: #FF6B2B;
+    --naranja-osc: #d4521a;
+    --negro: #0A0A0A;
+    --gris-osc: #141414;
+    --gris-med: #1E1E1E;
+    --gris-card: #1A1A1A;
+    --gris-borde: rgba(255,255,255,0.07);
+    --texto: #F0F0F0;
+    --muted: #888;
+    --blanco: #ffffff;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--negro);
+    color: var(--texto);
+    overflow-x: hidden;
+  }
+
+  /* ── FIELD TEXTURE ── */
+  .field-lines {
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 60px,
+        rgba(46,204,113,0.03) 60px,
+        rgba(46,204,113,0.03) 61px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 60px,
+        rgba(46,204,113,0.03) 60px,
+        rgba(46,204,113,0.03) 61px
+      );
+    pointer-events: none;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 1rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(10,10,10,0.9);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--gris-borde);
+  }
+
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px; letter-spacing: 0.08em;
+    color: var(--blanco);
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .nav-logo-badge {
+    font-size: 10px; font-weight: 600; font-family: 'Outfit', sans-serif;
+    background: var(--verde); color: var(--negro);
+    padding: 2px 7px; border-radius: 4px; letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .nav-links {
+    display: flex; align-items: center; gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 14px; color: var(--muted); text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--texto); }
+
+  .nav-cta {
+    background: var(--naranja); color: white;
+    padding: 9px 22px; border-radius: 8px;
+    font-size: 14px; font-weight: 600; text-decoration: none;
+    transition: all 0.2s; white-space: nowrap;
+  }
+
+  .nav-cta:hover { background: var(--naranja-osc); transform: translateY(-1px); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 8rem 2rem 5rem;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(46,204,113,0.08) 0%, transparent 65%);
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(46,204,113,0.08);
+    border: 1px solid rgba(46,204,113,0.2);
+    padding: 6px 16px; border-radius: 20px;
+    font-size: 13px; font-weight: 500; color: var(--verde);
+    margin-bottom: 1.5rem; letter-spacing: 0.03em;
+  }
+
+  .hero-dot { width: 6px; height: 6px; background: var(--verde); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
+
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 8vw, 96px);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    color: var(--blanco);
+    margin-bottom: 1.5rem;
+    max-width: 900px;
+  }
+
+  .hero h1 .accent { color: var(--verde); }
+  .hero h1 .accent-o { color: var(--naranja); }
+
+  .hero-sub {
+    font-size: clamp(16px, 2vw, 20px);
+    color: var(--muted);
+    max-width: 560px;
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+  }
+
+  .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+  .btn-primary {
+    background: var(--naranja); color: white;
+    padding: 15px 32px; border-radius: 10px;
+    font-size: 16px; font-weight: 700; text-decoration: none;
+    transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 8px;
+    border: none; cursor: pointer; font-family: 'Outfit', sans-serif;
+  }
+
+  .btn-primary:hover { background: var(--naranja-osc); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,107,43,0.3); }
+
+  .btn-ghost {
+    background: transparent; color: var(--muted);
+    padding: 15px 28px; border-radius: 10px;
+    font-size: 16px; font-weight: 500; text-decoration: none;
+    border: 1px solid var(--gris-borde); transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'Outfit', sans-serif; cursor: pointer;
+  }
+
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.2); color: var(--texto); }
+
+  .hero-stats {
+    display: flex; gap: 3rem; margin-top: 4rem;
+    padding-top: 3rem; border-top: 1px solid var(--gris-borde);
+    flex-wrap: wrap; justify-content: center;
+  }
+
+  .hero-stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px; color: var(--blanco); letter-spacing: 0.04em;
+  }
+
+  .hero-stat-num span { color: var(--verde); }
+  .hero-stat-label { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+  /* ── SECCIONES GENERALES ── */
+  section { padding: 6rem 2rem; position: relative; }
+
+  .section-tag {
+    display: inline-block;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--verde);
+    margin-bottom: 1rem;
+  }
+
+  .section-titulo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 5vw, 60px);
+    letter-spacing: 0.03em; line-height: 1;
+    margin-bottom: 1rem;
+  }
+
+  .section-sub { font-size: 16px; color: var(--muted); max-width: 540px; line-height: 1.6; }
+
+  .section-header { max-width: 1100px; margin: 0 auto 4rem; }
+  .section-header.center { text-align: center; }
+  .section-header.center .section-sub { margin: 0 auto; }
+
+  /* ── DOLORES ── */
+  .dolores { background: var(--gris-osc); }
+
+  .dolores-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem; max-width: 1100px; margin: 0 auto;
+  }
+
+  .dolor-card {
+    background: var(--gris-card);
+    border: 1px solid var(--gris-borde);
+    border-radius: 16px; padding: 2rem;
+    position: relative; overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .dolor-card:hover { border-color: rgba(255,107,43,0.3); }
+
+  .dolor-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--naranja), transparent);
+  }
+
+  .dolor-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 64px; line-height: 1;
+    color: rgba(255,107,43,0.08);
+    position: absolute; top: 1rem; right: 1.5rem;
+  }
+
+  .dolor-icon { font-size: 28px; margin-bottom: 1rem; }
+
+  .dolor-titulo {
+    font-size: 18px; font-weight: 700;
+    line-height: 1.3; margin-bottom: 0.75rem;
+    color: var(--blanco);
+  }
+
+  .dolor-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  /* ── SOLUCIÓN ── */
+  .solucion { background: var(--negro); }
+
+  .solucion-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 5rem; align-items: center;
+    max-width: 1100px; margin: 0 auto;
+  }
+
+  .features-list { display: flex; flex-direction: column; gap: 1.5rem; }
+
+  .feature-item {
+    display: flex; gap: 1rem; align-items: flex-start;
+    padding: 1.5rem; border-radius: 14px;
+    border: 1px solid var(--gris-borde);
+    background: var(--gris-card);
+    transition: border-color 0.2s;
+  }
+
+  .feature-item:hover { border-color: rgba(46,204,113,0.25); }
+
+  .feature-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: rgba(46,204,113,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+
+  .feature-titulo { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .feature-desc { font-size: 14px; color: var(--muted); line-height: 1.5; }
+
+  /* SEMÁFORO MOCKUP */
+  .mockup-wrap {
+    display: flex; justify-content: center; align-items: center;
+    position: relative;
+  }
+
+  .mockup-glow {
+    position: absolute;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(46,204,113,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .phone {
+    width: 260px;
+    background: #111;
+    border-radius: 36px;
+    border: 2px solid rgba(255,255,255,0.1);
+    padding: 12px;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+    position: relative; z-index: 1;
+  }
+
+  .notch {
+    width: 70px; height: 20px;
+    background: #0A0A0A; border-radius: 10px;
+    margin: 0 auto 10px;
+  }
+
+  .phone-screen {
+    background: #111; border-radius: 24px; overflow: hidden;
+  }
+
+  .phone-bar {
+    background: var(--verde-field);
+    padding: 12px 14px 14px;
+  }
+
+  .phone-bar-top {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 10px;
+  }
+
+  .phone-bar-title { font-size: 13px; font-weight: 600; color: white; }
+  .phone-bar-sub { font-size: 10px; color: rgba(255,255,255,0.6); }
+
+  .semaforo-titulo {
+    font-size: 10px; font-weight: 600;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+
+  .semaforo-item {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    background: rgba(0,0,0,0.2);
+    border-radius: 8px; padding: 8px 10px;
+    margin-bottom: 5px;
+  }
+
+  .sem-nombre { font-size: 11px; color: white; font-weight: 500; }
+  .sem-sub { font-size: 9px; color: rgba(255,255,255,0.5); }
+
+  .sem-badge {
+    font-size: 9px; font-weight: 700;
+    padding: 3px 8px; border-radius: 10px;
+    white-space: nowrap;
+  }
+
+  .sem-verde { background: rgba(46,204,113,0.2); color: #2ECC71; }
+  .sem-amarillo { background: rgba(255,193,7,0.2); color: #FFC107; }
+  .sem-rojo { background: rgba(231,76,60,0.2); color: #E74C3C; }
+
+  .phone-body { padding: 12px; }
+
+  .phone-stats {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px; margin-bottom: 10px;
+  }
+
+  .phone-stat {
+    background: rgba(255,255,255,0.04);
+    border-radius: 8px; padding: 8px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .phone-stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px; color: var(--verde);
+  }
+
+  .phone-stat-label { font-size: 9px; color: #555; }
+
+  /* ── PRECIOS ── */
+  .precios { background: var(--gris-osc); }
+
+  .precios-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 1.5rem; max-width: 800px; margin: 0 auto;
+  }
+
+  .precio-card {
+    background: var(--gris-card);
+    border: 1px solid var(--gris-borde);
+    border-radius: 20px; padding: 2.5rem;
+    position: relative; transition: transform 0.2s;
+  }
+
+  .precio-card:hover { transform: translateY(-4px); }
+
+  .precio-card.featured {
+    border-color: var(--naranja);
+    background: linear-gradient(135deg, rgba(255,107,43,0.05) 0%, var(--gris-card) 60%);
+  }
+
+  .precio-card.featured::before {
+    content: 'MÁS POPULAR';
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    background: var(--naranja); color: white;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    padding: 4px 14px; border-radius: 20px; white-space: nowrap;
+  }
+
+  .precio-plan {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px; letter-spacing: 0.15em;
+    color: var(--muted); margin-bottom: 0.75rem;
+  }
+
+  .precio-monto {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 60px; line-height: 1; color: var(--blanco);
+    letter-spacing: 0.02em;
+  }
+
+  .precio-monto sup { font-size: 24px; vertical-align: top; margin-top: 10px; }
+  .precio-monto sub { font-size: 16px; color: var(--muted); }
+  .precio-desc { font-size: 13px; color: var(--muted); margin: 0.5rem 0 1.75rem; }
+
+  .precio-divider { height: 1px; background: var(--gris-borde); margin-bottom: 1.5rem; }
+
+  .precio-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 2rem; }
+
+  .precio-features li {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 14px; color: var(--texto); line-height: 1.4;
+  }
+
+  .precio-features li::before {
+    content: '✓'; color: var(--verde); font-size: 13px;
+    font-weight: 700; flex-shrink: 0; margin-top: 1px;
+  }
+
+  .btn-plan {
+    display: block; width: 100%; text-align: center;
+    padding: 14px; border-radius: 10px;
+    font-size: 15px; font-weight: 600; font-family: 'Outfit', sans-serif;
+    text-decoration: none; transition: all 0.2s; cursor: pointer; border: none;
+  }
+
+  .btn-plan-outline {
+    border: 1.5px solid rgba(255,255,255,0.15); color: var(--texto);
+    background: transparent;
+  }
+
+  .btn-plan-outline:hover { border-color: rgba(255,255,255,0.3); }
+
+  .btn-plan-solid { background: var(--naranja); color: white; }
+  .btn-plan-solid:hover { background: var(--naranja-osc); }
+
+  /* COMPARATIVA */
+  .comparativa {
+    max-width: 800px; margin: 3rem auto 0;
+    background: var(--gris-card);
+    border: 1px solid var(--gris-borde);
+    border-radius: 16px; overflow: hidden;
+  }
+
+  .comp-header {
+    display: grid; grid-template-columns: 2fr 1fr 1fr;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid var(--gris-borde);
+  }
+
+  .comp-header div {
+    padding: 12px 16px; font-size: 12px; font-weight: 600;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em;
+  }
+
+  .comp-header div:not(:first-child) { text-align: center; }
+
+  .comp-row {
+    display: grid; grid-template-columns: 2fr 1fr 1fr;
+    border-bottom: 1px solid var(--gris-borde);
+  }
+
+  .comp-row:last-child { border-bottom: none; }
+
+  .comp-row div {
+    padding: 12px 16px; font-size: 13px;
+    color: var(--muted);
+  }
+
+  .comp-row div:not(:first-child) { text-align: center; }
+  .comp-row .feature-name { color: var(--texto); }
+  .comp-row .check { color: var(--verde); font-size: 16px; }
+  .comp-row .cross { color: #444; font-size: 16px; }
+
+  /* ── DEMO ── */
+  .demo { background: var(--negro); }
+
+  .demo-inner {
+    max-width: 1100px; margin: 0 auto;
+    background: linear-gradient(135deg, rgba(46,204,113,0.06) 0%, rgba(255,107,43,0.04) 100%);
+    border: 1px solid rgba(46,204,113,0.15);
+    border-radius: 24px; padding: 4rem;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 4rem; align-items: center;
+  }
+
+  .demo h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 4vw, 54px);
+    letter-spacing: 0.03em; line-height: 1;
+    margin-bottom: 1rem;
+  }
+
+  .demo-sub { font-size: 16px; color: var(--muted); line-height: 1.6; margin-bottom: 2rem; }
+
+  .demo-puntos { display: flex; flex-direction: column; gap: 10px; margin-bottom: 2rem; }
+
+  .demo-punto {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px; color: var(--texto);
+  }
+
+  .demo-punto::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--verde); border-radius: 50%; flex-shrink: 0;
+  }
+
+  .demo-mockup {
+    background: var(--gris-card);
+    border: 1px solid var(--gris-borde);
+    border-radius: 16px; padding: 1.5rem;
+    position: relative; overflow: hidden;
+  }
+
+  .demo-mockup-header {
+    display: flex; align-items: center;
+    gap: 8px; margin-bottom: 1.25rem;
+  }
+
+  .demo-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  .demo-barra {
+    height: 8px; border-radius: 4px;
+    margin-bottom: 8px; transition: width 0.3s;
+  }
+
+  .demo-label {
+    display: flex; justify-content: space-between;
+    font-size: 12px; color: var(--muted); margin-bottom: 4px;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--gris-osc);
+    border-top: 1px solid var(--gris-borde);
+    padding: 3rem 2rem;
+  }
+
+  .footer-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 3rem;
+  }
+
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px; letter-spacing: 0.08em; color: var(--blanco);
+    margin-bottom: 0.75rem;
+  }
+
+  .footer-desc { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 1.5rem; }
+
+  .footer-social { display: flex; gap: 10px; }
+
+  .social-btn {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--gris-borde);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; text-decoration: none; transition: all 0.2s; color: var(--muted);
+  }
+
+  .social-btn:hover { border-color: rgba(46,204,113,0.3); color: var(--verde); }
+
+  .footer-col-titulo {
+    font-size: 12px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem;
+  }
+
+  .footer-col-links { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+
+  .footer-col-links a {
+    font-size: 14px; color: var(--muted); text-decoration: none; transition: color 0.2s;
+  }
+
+  .footer-col-links a:hover { color: var(--texto); }
+
+  .footer-bottom {
+    max-width: 1100px; margin: 2rem auto 0;
+    padding-top: 1.5rem; border-top: 1px solid var(--gris-borde);
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 1rem;
+    font-size: 13px; color: var(--muted);
+  }
+
+  /* ── BOTÓN FLOTANTE PADRE ── */
+  .fab-padre {
+    position: fixed; bottom: 2rem; right: 2rem; z-index: 99;
+    background: linear-gradient(135deg, var(--verde), #27ae60);
+    color: white; border: none; border-radius: 50px;
+    padding: 13px 20px;
+    font-size: 13px; font-weight: 600; font-family: 'Outfit', sans-serif;
+    cursor: pointer; box-shadow: 0 8px 24px rgba(46,204,113,0.35);
+    display: flex; align-items: center; gap: 8px;
+    transition: all 0.2s; white-space: nowrap;
+    animation: fabIn 0.5s ease 1s both;
+  }
+
+  @keyframes fabIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .fab-padre:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(46,204,113,0.45); }
+  .fab-padre .fab-icon { font-size: 18px; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.8); backdrop-filter: blur(6px);
+    align-items: center; justify-content: center; padding: 1rem;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--gris-med);
+    border: 1px solid var(--gris-borde);
+    border-radius: 20px; padding: 2.5rem;
+    max-width: 460px; width: 100%;
+    position: relative; animation: modalIn 0.25s ease;
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .modal-close {
+    position: absolute; top: 1rem; right: 1.25rem;
+    background: none; border: none; color: var(--muted);
+    font-size: 22px; cursor: pointer; line-height: 1;
+    transition: color 0.2s;
+  }
+
+  .modal-close:hover { color: var(--texto); }
+
+  .modal h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px; letter-spacing: 0.05em; margin-bottom: 4px;
+  }
+
+  .modal-sub { font-size: 14px; color: var(--muted); margin-bottom: 1.5rem; }
+
+  .modal-campo { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+
+  .modal-campo label { font-size: 13px; font-weight: 500; color: var(--texto); }
+
+  .modal-campo input, .modal-campo select {
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--gris-borde); border-radius: 10px;
+    font-size: 14px; font-family: 'Outfit', sans-serif;
+    color: var(--texto); outline: none; transition: border-color 0.15s;
+    appearance: none;
+  }
+
+  .modal-campo input:focus, .modal-campo select:focus {
+    border-color: rgba(46,204,113,0.4);
+  }
+
+  .modal-plan-tag {
+    display: inline-block; font-size: 12px; font-weight: 600;
+    padding: 4px 10px; border-radius: 6px; margin-bottom: 1.25rem;
+  }
+
+  .modal-plan-tag.base { background: rgba(46,204,113,0.1); color: var(--verde); }
+  .modal-plan-tag.premium { background: rgba(255,107,43,0.1); color: var(--naranja); }
+
+  .btn-modal {
+    width: 100%; padding: 13px;
+    background: var(--naranja); color: white; border: none;
+    border-radius: 10px; font-size: 15px; font-weight: 600;
+    font-family: 'Outfit', sans-serif; cursor: pointer; transition: all 0.2s;
+  }
+
+  .btn-modal:hover { background: var(--naranja-osc); }
+
+  .modal-wsp {
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px; margin-top: 1rem;
+    font-size: 13px; color: var(--muted);
+    text-decoration: none; transition: color 0.2s;
+  }
+
+  .modal-wsp:hover { color: var(--verde); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .dolores-grid { grid-template-columns: 1fr; }
+    .solucion-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .precios-grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
+    .comparativa .comp-header,
+    .comparativa .comp-row { display: none; }
+    .demo-inner { grid-template-columns: 1fr; gap: 2rem; padding: 2rem; }
+    .footer-inner { grid-template-columns: 1fr 1fr; gap: 2rem; }
+    .nav-links { display: none; }
+  }
+
+  @media (max-width: 600px) {
+    section { padding: 4rem 1.25rem; }
+    .footer-inner { grid-template-columns: 1fr; }
+    .fab-padre span { display: none; }
+    .fab-padre { padding: 14px; border-radius: 50%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    Potrero<span style="color:var(--verde)">.</span>app
+    <span class="nav-logo-badge">Beta</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#problema">El problema</a></li>
+    <li><a href="#solucion">Solución</a></li>
+    <li><a href="#precios">Precios</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+  </ul>
+  <a href="#" class="nav-cta" onclick="abrirModal('demo')">Pedir Demo Gratis</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="field-lines"></div>
+  <div class="hero-glow"></div>
+
+  <div class="hero-tag">
+    <div class="hero-dot"></div>
+    Software para escuelas de fútbol
+  </div>
+
+  <h1>
+    Dejá de<br>
+    perseguir <span class="accent">pagos</span>,<br>
+    empezá a disfrutar<br>
+    el <span class="accent-o">fútbol</span>
+  </h1>
+
+  <p class="hero-sub">
+    Potrero.app automatiza la administración, cobranzas y asistencia de tu escuela en un solo lugar.
+  </p>
+
+  <div class="hero-btns">
+    <button class="btn-primary" onclick="abrirModal('demo')">
+      Pedir Demo Gratis
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+    <a href="#solucion" class="btn-ghost">Ver cómo funciona</a>
+  </div>
+
+  <div class="hero-stats">
+    <div>
+      <div class="hero-stat-num"><span>+</span>300</div>
+      <div class="hero-stat-label">Escuelas en LATAM</div>
+    </div>
+    <div>
+      <div class="hero-stat-num"><span>95</span>%</div>
+      <div class="hero-stat-label">Cobro puntual de cuotas</div>
+    </div>
+    <div>
+      <div class="hero-stat-num"><span>8</span>h</div>
+      <div class="hero-stat-label">Admin ahorradas por semana</div>
+    </div>
+  </div>
+</section>
+
+<!-- DOLORES -->
+<section class="dolores" id="problema">
+  <div class="field-lines"></div>
+  <div class="section-header center">
+    <span class="section-tag">El problema</span>
+    <h2 class="section-titulo">¿Te suena familiar?</h2>
+    <p class="section-sub">Dirigís una escuela de fútbol pero terminás siendo contador, secretario y cobrador al mismo tiempo.</p>
+  </div>
+
+  <div class="dolores-grid">
+    <div class="dolor-card">
+      <div class="dolor-num">01</div>
+      <div class="dolor-icon">💸</div>
+      <div class="dolor-titulo">¿Perdés dinero por cuotas sin cobrar?</div>
+      <div class="dolor-desc">Sin un sistema claro, el 30% de las cuotas se cobran tarde o nunca. Cada mes que pasa es plata que no entra.</div>
+    </div>
+    <div class="dolor-card">
+      <div class="dolor-num">02</div>
+      <div class="dolor-icon">📱</div>
+      <div class="dolor-titulo">¿Tu WhatsApp está colapsado de comprobantes?</div>
+      <div class="dolor-desc">Fotos de transferencias, capturas de MercadoPago, audios de "ya te mandé"… y vos sin poder verificar nada.</div>
+    </div>
+    <div class="dolor-card">
+      <div class="dolor-num">03</div>
+      <div class="dolor-icon">📋</div>
+      <div class="dolor-titulo">¿La asistencia de los chicos es un caos de papeles?</div>
+      <div class="dolor-desc">Planillas perdidas, libretas mojadas, datos que nunca terminan en ningún lado útil. Imposible hacer seguimiento.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUCIÓN -->
+<section class="solucion" id="solucion">
+  <div class="solucion-grid">
+    <div>
+      <span class="section-tag">La solución</span>
+      <h2 class="section-titulo">Todo bajo control,<br>desde el celular</h2>
+      <p class="section-sub" style="margin-bottom:2.5rem">Potrero.app trabaja para vos mientras vos dirigís el entrenamiento.</p>
+
+      <div class="features-list">
+        <div class="feature-item">
+          <div class="feature-icon">🔗</div>
+          <div>
+            <div class="feature-titulo">Onboarding automático</div>
+            <div class="feature-desc">Los padres se inscriben solos mediante un link. La ficha completa llega a tu panel sin que hagas nada.</div>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🚦</div>
+          <div>
+            <div class="feature-titulo">Gestión por excepción</div>
+            <div class="feature-desc">El sistema te avisa solo quién debe o quién faltó. Vos solo actuás cuando hace falta, no revisás todo.</div>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🏟</div>
+          <div>
+            <div class="feature-titulo">Multisede</div>
+            <div class="feature-desc">Gestioná varias sedes desde una sola cuenta. Cada sede tiene su propio equipo y sus propios reportes.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOCKUP SEMÁFORO -->
+    <div class="mockup-wrap">
+      <div class="mockup-glow"></div>
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="phone-screen">
+          <div class="phone-bar">
+            <div class="phone-bar-top">
+              <div>
+                <div class="phone-bar-title">Potrero.app</div>
+                <div class="phone-bar-sub">Escuela Belgrano · Mayo 2025</div>
+              </div>
+            </div>
+            <div class="semaforo-titulo">Semáforo de morosidad</div>
+            <div class="semaforo-item">
+              <div><div class="sem-nombre">Mateo González</div><div class="sem-sub">Sub-10 · Lun/Mié</div></div>
+              <span class="sem-badge sem-verde">Al día</span>
+            </div>
+            <div class="semaforo-item">
+              <div><div class="sem-nombre">Lucas Fernández</div><div class="sem-sub">Sub-12 · Mar/Jue</div></div>
+              <span class="sem-badge sem-amarillo">1 mes</span>
+            </div>
+            <div class="semaforo-item">
+              <div><div class="sem-nombre">Tomás Martínez</div><div class="sem-sub">Sub-8 · Sábados</div></div>
+              <span class="sem-badge sem-rojo">2+ meses</span>
+            </div>
+            <div class="semaforo-item">
+              <div><div class="sem-nombre">Sofía Rodríguez</div><div class="sem-sub">Sub-10 · Lun/Mié</div></div>
+              <span class="sem-badge sem-verde">Al día</span>
+            </div>
+          </div>
+          <div class="phone-body">
+            <div class="phone-stats">
+              <div class="phone-stat">
+                <div class="phone-stat-num">87</div>
+                <div class="phone-stat-label">Alumnos</div>
+              </div>
+              <div class="phone-stat">
+                <div class="phone-stat-num" style="color:var(--naranja)">9</div>
+                <div class="phone-stat-label">Deben</div>
+              </div>
+              <div class="phone-stat">
+                <div class="phone-stat-num">94%</div>
+                <div class="phone-stat-label">Asistencia</div>
+              </div>
+            </div>
+            <div>
+              <div class="demo-label"><span>Cobro del mes</span><span style="color:var(--verde)">78%</span></div>
+              <div style="background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden;height:6px">
+                <div style="width:78%;height:100%;background:var(--verde);border-radius:4px"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRECIOS -->
+<section class="precios" id="precios">
+  <div class="field-lines"></div>
+  <div class="section-header center">
+    <span class="section-tag">Inversión</span>
+    <h2 class="section-titulo">Precios claros,<br>sin sorpresas</h2>
+    <p class="section-sub">14 días de prueba gratis. Sin tarjeta de crédito.</p>
+  </div>
+
+  <div class="precios-grid">
+    <div class="precio-card">
+      <div class="precio-plan">Plan BASE</div>
+      <div class="precio-monto"><sup>USD</sup> 50<sub>/mes</sub></div>
+      <div class="precio-desc">Para escuelas que arrancan a organizarse</div>
+      <div class="precio-divider"></div>
+      <ul class="precio-features">
+        <li>1 Usuario Administrador</li>
+        <li>Gestión de alumnos ilimitada</li>
+        <li>Link de inscripción para padres</li>
+        <li>Control de asistencia</li>
+        <li>Reporte de morosidad (Semáforo)</li>
+      </ul>
+      <button class="btn-plan btn-plan-outline" onclick="abrirModal('base')">Empezar con BASE</button>
+    </div>
+
+    <div class="precio-card featured">
+      <div class="precio-plan">Plan PREMIUM</div>
+      <div class="precio-monto"><sup>USD</sup> 80<sub>/mes</sub></div>
+      <div class="precio-desc">Para escuelas que quieren crecer en serio</div>
+      <div class="precio-divider"></div>
+      <ul class="precio-features">
+        <li>Hasta 6 usuarios (Staff)</li>
+        <li>Todo lo del plan BASE</li>
+        <li>Control de gastos y balances</li>
+        <li>Personalización con logo y colores propios</li>
+        <li>Gestión multisede</li>
+        <li>Soporte prioritario</li>
+      </ul>
+      <button class="btn-plan btn-plan-solid" onclick="abrirModal('premium')">Empezar con PREMIUM</button>
+    </div>
+  </div>
+
+  <!-- COMPARATIVA -->
+  <div class="comparativa">
+    <div class="comp-header">
+      <div>Funcionalidad</div>
+      <div>BASE</div>
+      <div>PREMIUM</div>
+    </div>
+    <div class="comp-row"><div class="feature-name">Alumnos ilimitados</div><div class="check">✓</div><div class="check">✓</div></div>
+    <div class="comp-row"><div class="feature-name">Asistencia digital</div><div class="check">✓</div><div class="check">✓</div></div>
+    <div class="comp-row"><div class="feature-name">Semáforo de morosidad</div><div class="check">✓</div><div class="check">✓</div></div>
+    <div class="comp-row"><div class="feature-name">Link de inscripción</div><div class="check">✓</div><div class="check">✓</div></div>
+    <div class="comp-row"><div class="feature-name">Usuarios de staff</div><div class="cross">—</div><div class="check">✓</div></div>
+    <div class="comp-row"><div class="feature-name">Balances y gastos</div><div class="cross">—</div><div class="check">✓</div></div>
+    <div class="comp-row"><div class="feature-name">Multisede</div><div class="cross">—</div><div class="check">✓</div></div>
+    <div class="comp-row"><div class="feature-name">Marca personalizada</div><div class="cross">—</div><div class="check">✓</div></div>
+  </div>
+</section>
+
+<!-- DEMO -->
+<section class="demo" id="contacto">
+  <div class="demo-inner">
+    <div>
+      <span class="section-tag">Demo gratis</span>
+      <h2>Velo en acción<br>en <span style="color:var(--verde)">30 minutos</span></h2>
+      <p class="demo-sub">Te mostramos la app en vivo con datos de tu escuela. Sin compromiso, sin tecnicismos.</p>
+      <div class="demo-puntos">
+        <div class="demo-punto">Te configuramos la app en vivo</div>
+        <div class="demo-punto">Cargamos tus categorías y alumnos de prueba</div>
+        <div class="demo-punto">Ves el semáforo de morosidad funcionando</div>
+        <div class="demo-punto">Respondemos todas tus preguntas</div>
+      </div>
+      <button class="btn-primary" onclick="abrirModal('demo')">
+        Agendá tu demo gratuita
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+    <div class="demo-mockup">
+      <div class="demo-mockup-header">
+        <div class="demo-dot" style="background:#FF5F57"></div>
+        <div class="demo-dot" style="background:#FEBC2E"></div>
+        <div class="demo-dot" style="background:#28C840"></div>
+        <span style="font-size:12px;color:var(--muted);margin-left:8px">Dashboard · Mayo 2025</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px">Cobros del mes</div>
+      <div>
+        <div class="demo-label"><span>Sub-8</span><span>$42,000</span></div>
+        <div style="background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden;height:8px;margin-bottom:10px">
+          <div style="width:90%;height:100%;background:var(--verde);border-radius:4px"></div>
+        </div>
+        <div class="demo-label"><span>Sub-10</span><span>$67,000</span></div>
+        <div style="background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden;height:8px;margin-bottom:10px">
+          <div style="width:75%;height:100%;background:var(--verde);border-radius:4px"></div>
+        </div>
+        <div class="demo-label"><span>Sub-12</span><span>$51,000</span></div>
+        <div style="background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden;height:8px;margin-bottom:10px">
+          <div style="width:60%;height:100%;background:var(--naranja);border-radius:4px"></div>
+        </div>
+        <div class="demo-label"><span>Sub-14</span><span>$38,000</span></div>
+        <div style="background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden;height:8px;margin-bottom:16px">
+          <div style="width:45%;height:100%;background:var(--naranja);border-radius:4px"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px">
+        <div style="flex:1;background:rgba(46,204,113,0.08);border:1px solid rgba(46,204,113,0.15);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--verde)">$198K</div>
+          <div style="font-size:11px;color:var(--muted)">Cobrado</div>
+        </div>
+        <div style="flex:1;background:rgba(255,107,43,0.06);border:1px solid rgba(255,107,43,0.12);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--naranja)">$42K</div>
+          <div style="font-size:11px;color:var(--muted)">Pendiente</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-logo">Potrero<span style="color:var(--verde)">.</span>app</div>
+      <p class="footer-desc">Software de gestión para escuelas de fútbol de Argentina y LATAM. Simple, rápido, sin papeles.</p>
+      <div class="footer-social">
+        <a class="social-btn" href="#" title="Instagram">📸</a>
+        <a class="social-btn" href="#" title="WhatsApp">💬</a>
+        <a class="social-btn" href="#" title="LinkedIn">💼</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-titulo">Producto</div>
+      <ul class="footer-col-links">
+        <li><a href="#solucion">Funciones</a></li>
+        <li><a href="#precios">Precios</a></li>
+        <li><a href="#contacto">Demo gratis</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-titulo">Legal</div>
+      <ul class="footer-col-links">
+        <li><a href="#">Términos de uso</a></li>
+        <li><a href="#">Política de privacidad</a></li>
+        <li><a href="#">Cookies</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-titulo">Contacto</div>
+      <ul class="footer-col-links">
+        <li><a href="mailto:hola@potrero.app">hola@potrero.app</a></li>
+        <li><a href="https://wa.me/5492610000000" target="_blank">WhatsApp</a></li>
+        <li><a href="#">Instagram</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 Potrero.app · Hecho en Mendoza, Argentina 🇦🇷</span>
+    <span>Todos los derechos reservados</span>
+  </div>
+</footer>
+
+<!-- BOTÓN FLOTANTE PADRE -->
+<button class="fab-padre" onclick="abrirModal('padre')">
+  <span class="fab-icon">⚽</span>
+  <span>¿Sos padre? Inscribí a tu hijo aquí</span>
+</button>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="cerrarModalOverlay(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="cerrarModal()">×</button>
+    <div id="modal-contenido"></div>
+  </div>
+</div>
+
+<script>
+  const WA_NUMBER = "5492610000000"; // ← Reemplazá con tu número
+
+  const modales = {
+    demo: {
+      titulo: "Pedí tu demo gratuita",
+      sub: "Te contactamos en menos de 24hs para agendar",
+      plan: null,
+    },
+    base: {
+      titulo: "Empezar con Plan BASE",
+      sub: "USD 50/mes · 14 días de prueba gratis",
+      plan: "base",
+    },
+    premium: {
+      titulo: "Empezar con Plan PREMIUM",
+      sub: "USD 80/mes · 14 días de prueba gratis",
+      plan: "premium",
+    },
+    padre: {
+      titulo: "Inscribí a tu hijo/a",
+      sub: "Completá tus datos y te contactamos",
+      plan: null,
+    },
+  };
+
+  function abrirModal(tipo) {
+    const cfg = modales[tipo];
+    const planTag = cfg.plan
+      ? `<span class="modal-plan-tag ${cfg.plan}">${cfg.plan.toUpperCase()}</span><br>`
+      : '';
+
+    document.getElementById('modal-contenido').innerHTML = `
+      ${planTag}
+      <h3>${cfg.titulo}</h3>
+      <p class="modal-sub">${cfg.sub}</p>
+      <div class="modal-campo">
+        <label>Tu nombre</label>
+        <input type="text" id="m-nombre" placeholder="ej: Carlos García">
+      </div>
+      <div class="modal-campo">
+        <label>WhatsApp</label>
+        <input type="tel" id="m-tel" placeholder="ej: 2614567890">
+      </div>
+      <div class="modal-campo">
+        <label>Nombre de tu escuela</label>
+        <input type="text" id="m-escuela" placeholder="ej: Escuela Belgrano">
+      </div>
+      <div class="modal-campo">
+        <label>¿Cuántos alumnos tenés?</label>
+        <select id="m-alumnos">
+          <option value="">Seleccioná</option>
+          <option>Menos de 30</option>
+          <option>30 a 80</option>
+          <option>80 a 150</option>
+          <option>Más de 150</option>
+        </select>
+      </div>
+      <button class="btn-modal" onclick="enviarWsp('${tipo}')">
+        Enviar por WhatsApp
+      </button>
+      <a class="modal-wsp" href="mailto:hola@potrero.app">
+        ✉ Prefiero enviar por email
+      </a>
+    `;
+    document.getElementById('modal-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function cerrarModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function cerrarModalOverlay(e) {
+    if (e.target === document.getElementById('modal-overlay')) cerrarModal();
+  }
+
+  function enviarWsp(tipo) {
+    const nombre  = document.getElementById('m-nombre').value.trim();
+    const tel     = document.getElementById('m-tel').value.trim();
+    const escuela = document.getElementById('m-escuela').value.trim();
+    const alumnos = document.getElementById('m-alumnos').value;
+
+    if (!nombre || !tel) {
+      alert('Por favor completá tu nombre y WhatsApp.');
+      return;
+    }
+
+    const cfg = modales[tipo];
+    const msg = encodeURIComponent(
+      `Hola! Me interesa ${cfg.titulo}.\n\n` +
+      `👤 Nombre: ${nombre}\n` +
+      `📱 Tel: ${tel}\n` +
+      `🏫 Escuela: ${escuela || 'No informado'}\n` +
+      `👦 Alumnos: ${alumnos || 'No informado'}`
+    );
+
+    window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
+    cerrarModal();
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModal(); });
+</script>
+
+</body>
+</html>
